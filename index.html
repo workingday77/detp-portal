@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>신규입사자 온보딩 포털</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;800&display=swap">
+<style>
+  /*
+    레이아웃 컨셉: 상단 고정 네비 + 섹션 단위 세로 스크롤 (교육 샘플 portal_v2와 동일 구조).
+    각 섹션은 scroll-margin-top으로 고정 메뉴 높이만큼 여백을 두어 앵커 이동 시 제목이 가려지지 않도록 함.
+    색·글꼴·여백은 "우리 부서 포털" 디자인 시스템(https://claude.ai/artifact/VdbSaFT3cxwYQEVcAPFMGX)을 따름.
+    ※ 교육용 예시 페이지. 실명·연락처·급여·사번 등 민감정보와 실제 사내 기밀을 담지 않음.
+  */
+  :root {
+    --bg: #f3f9fa; --surface: #ffffff; --surface-2: #e2f1f3;
+    --ink: #0f2a30; --ink-soft: #4a6469; --line: #cde4e8;
+    --blue: #0d6b7a; --blue-deep: #084852; --sky: #118596; --sky-soft: #ddf1f4; --on-primary: #ffffff;
+    --warn: #b45309; --warn-soft: #fff4e0;
+    --font-display: 'Noto Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    --font-body: 'Noto Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    /* 우리 부서 포털 디자인 시스템: 글꼴 크기 · 여백 · 모서리 */
+    --fs-title: 32px; --fs-subtitle: 20px; --fs-body: 16px; --fs-small: 14px; --fs-label: 12px;
+    --space-md: 16px; --space-lg: 24px; --space-xl: 48px;
+    --radius-sm: 4px; --radius-md: 8px;
+    --nav-h: 64px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1719; --surface: #112226; --surface-2: #152a2f;
+      --ink: #e6f4f6; --ink-soft: #98b7bc; --line: #22393e;
+      --blue: #4fc3d1; --blue-deep: #9fe3eb; --sky: #5cd0dd; --sky-soft: #14323a; --on-primary: #071417;
+      --warn: #fbbf24; --warn-soft: #2a2110;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1719; --surface: #112226; --surface-2: #152a2f;
+    --ink: #e6f4f6; --ink-soft: #98b7bc; --line: #22393e;
+    --blue: #4fc3d1; --blue-deep: #9fe3eb; --sky: #5cd0dd; --sky-soft: #14323a; --on-primary: #071417;
+    --warn: #fbbf24; --warn-soft: #2a2110;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  a { color: inherit; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  /* ---------- 교육용 안내 띠 ---------- */
+  .notice-bar {
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+    padding: 6px 16px;
+  }
+
+  /* ---------- 고정 상단 네비 ---------- */
+  header.nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: var(--nav-h); gap: 12px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 800; font-size: 17px; letter-spacing: -0.02em;
+    color: var(--blue-deep); white-space: nowrap; text-decoration: none;
+  }
+  .brand .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--sky)); flex: none;
+  }
+  nav.menu {
+    display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; min-width: 0;
+  }
+  nav.menu::-webkit-scrollbar { display: none; }
+  nav.menu a {
+    flex: none; text-decoration: none; font-size: 14px; font-weight: 600;
+    color: var(--ink-soft); padding: 8px 11px; border-radius: 999px;
+    transition: background .15s, color .15s; white-space: nowrap;
+  }
+  nav.menu a:hover, nav.menu a:focus-visible { background: var(--sky-soft); color: var(--blue-deep); outline: none; }
+  nav.menu a.active { background: var(--blue); color: var(--surface); }
+  .theme-btn {
+    flex: none; width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 16px;
+  }
+
+  /* ---------- 섹션 공통 ---------- */
+  section {
+    padding-block: 56px;
+    scroll-margin-top: calc(var(--nav-h) + 14px);
+  }
+  .alt { background: var(--surface-2); }
+  .eyebrow {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em;
+    color: var(--blue); background: var(--sky-soft); padding: 5px 10px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .section-title { font-size: clamp(22px, 4vw, 30px); font-weight: 800; letter-spacing: -0.02em; }
+  .section-sub { margin-top: 10px; color: var(--ink-soft); font-size: 15px; max-width: 62ch; }
+  .ex {
+    display: inline-block; font-size: 11px; font-weight: 700; color: var(--warn);
+    background: var(--warn-soft); border-radius: 6px; padding: 1px 6px; margin-left: 4px; vertical-align: 1px;
+  }
+  .note { margin-top: 14px; font-size: 12.5px; color: var(--ink-soft); }
+
+  /* ---------- 홈 ---------- */
+  #home {
+    padding-top: 64px; padding-bottom: 60px;
+    background: radial-gradient(900px 400px at 85% -10%, color-mix(in srgb, var(--sky) 22%, transparent), transparent 70%), var(--bg);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
+  .hero-title { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; }
+  .hero-title .accent {
+    background: linear-gradient(90deg, var(--blue), var(--sky));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-desc { margin-top: 16px; color: var(--ink-soft); font-size: 16px; max-width: 48ch; }
+  .hero-actions { margin-top: 26px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 12px 20px; border-radius: 10px;
+    font-weight: 700; font-size: 14.5px; text-decoration: none; border: 1px solid transparent; cursor: pointer;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--sky)); color: #fff;
+    box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--blue) 55%, transparent);
+  }
+  .btn-ghost { background: var(--surface); color: var(--blue-deep); border-color: var(--line); }
+  .btn-sm { padding: 8px 14px; font-size: 13.5px; }
+  .hero-stats { margin-top: 32px; display: flex; gap: 32px; flex-wrap: wrap; }
+  .stat .num { font-size: 24px; font-weight: 800; color: var(--blue-deep); font-variant-numeric: tabular-nums; }
+  .stat .label { font-size: 13px; color: var(--ink-soft); }
+  .hero-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px;
+    box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--blue-deep) 30%, transparent);
+  }
+  .hero-card h3 { font-size: 16px; font-weight: 800; }
+  .hero-card .row {
+    display: flex; justify-content: space-between; gap: 12px; padding: 11px 0;
+    border-bottom: 1px dashed var(--line); font-size: 14px;
+  }
+  .hero-card .row:last-child { border-bottom: none; }
+  .hero-card .row b { color: var(--blue-deep); font-variant-numeric: tabular-nums; flex: none; }
+
+  /* ---------- 온보딩 여정 타임라인 ---------- */
+  .timeline { margin-top: 36px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; top: 35px; left: 6%; right: 6%; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--sky)); opacity: .5;
+  }
+  .step { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 16px 18px; min-width: 0; }
+  .num-badge {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--sky)); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;
+    margin-bottom: 14px; box-shadow: 0 0 0 4px var(--bg);
+  }
+  .step h4 { font-size: 15.5px; font-weight: 800; margin-bottom: 6px; }
+  .step p { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+  .dur {
+    display: inline-block; margin-top: 10px; font-size: 11.5px; font-weight: 700;
+    color: var(--blue); background: var(--sky-soft); padding: 3px 8px; border-radius: 999px;
+  }
+
+  /* ---------- 체크리스트 ---------- */
+  .tabs { margin-top: 28px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tab {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+    padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+  .tab[aria-selected="true"] { background: var(--blue); color: var(--surface); border-color: var(--blue); }
+  .check-panel { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .progress-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .progress { flex: 1; height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .progress > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--blue), var(--sky)); transition: width .25s; }
+  .progress-label { font-size: 13.5px; font-weight: 700; color: var(--blue-deep); font-variant-numeric: tabular-nums; min-width: 92px; text-align: right; }
+  .check-group h4 { font-size: 13px; color: var(--ink-soft); font-weight: 700; margin: 16px 0 6px; }
+  .check-group h4:first-child { margin-top: 0; }
+  label.check {
+    display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  }
+  label.check:hover { background: var(--sky-soft); }
+  label.check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--blue); flex: none; }
+  label.check .t { font-weight: 700; font-size: 14.5px; }
+  label.check .d { display: block; font-size: 13px; color: var(--ink-soft); font-weight: 400; }
+  label.check input:checked + span .t { text-decoration: line-through; color: var(--ink-soft); }
+  .panel-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+  .link-btn { background: none; border: none; color: var(--blue); font-weight: 700; font-size: 13px; cursor: pointer; padding: 4px 0; }
+
+  /* ---------- 카드 그리드 (조직·가치) ---------- */
+  .grid-3 { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .grid-4 { margin-top: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+    display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  }
+  .card .icon {
+    width: 42px; height: 42px; border-radius: 10px; background: var(--sky-soft); color: var(--blue-deep);
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .card h4 { font-size: 16.5px; font-weight: 800; }
+  .card p { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11.5px; font-weight: 600; color: var(--blue-deep); background: var(--sky-soft); border-radius: 999px; padding: 3px 9px; }
+  .sub-title { margin-top: 40px; font-size: 18px; font-weight: 800; }
+  .value-card .kw { font-size: 22px; font-weight: 800; color: var(--blue-deep); }
+  .way-list { margin-top: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .way { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 14px; }
+  .way b { color: var(--blue-deep); }
+
+  /* ---------- 사내 시스템 ---------- */
+  .sys-layout { margin-top: 28px; display: grid; grid-template-columns: 260px 1fr; gap: 18px; align-items: start; }
+  .sys-list { display: flex; flex-direction: column; gap: 6px; }
+  .sys-btn {
+    text-align: left; display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 700; font-size: 14.5px;
+  }
+  .sys-btn[aria-selected="true"] { border-color: var(--blue); box-shadow: inset 3px 0 0 var(--blue); color: var(--blue-deep); }
+  .sys-detail { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; min-width: 0; }
+  .sys-detail h3 { font-size: 19px; font-weight: 800; }
+  .sys-detail .what { color: var(--ink-soft); font-size: 14px; margin: 6px 0 16px; }
+  .sys-detail ol { margin: 0; padding-left: 0; list-style: none; counter-reset: s; }
+  .sys-detail ol li {
+    counter-increment: s; position: relative; padding: 10px 0 10px 40px; border-bottom: 1px dashed var(--line); font-size: 14px;
+  }
+  .sys-detail ol li:last-child { border-bottom: none; }
+  .sys-detail ol li::before {
+    content: counter(s); position: absolute; left: 0; top: 9px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--sky-soft); color: var(--blue-deep); font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tip { margin-top: 14px; background: var(--sky-soft); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; }
+
+  /* ---------- 검색·필터 공통 ---------- */
+  .toolbar { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .search {
+    flex: 1 1 260px; min-width: 0; padding: 11px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface);
+  }
+  .search:focus, .field:focus { outline: 2px solid var(--sky); outline-offset: 1px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+    padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--surface); }
+  .empty { padding: 28px; text-align: center; color: var(--ink-soft); font-size: 14px; }
+
+  /* ---------- Q&A 게시판 ---------- */
+  .qna-layout { margin-top: 8px; display: grid; grid-template-columns: 1fr 340px; gap: 18px; align-items: start; }
+  .board { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; min-width: 0; }
+  .post { border-bottom: 1px solid var(--line); }
+  .post:last-child { border-bottom: none; }
+  .post-head {
+    width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 14px 18px;
+  }
+  .post-head:hover { background: var(--sky-soft); }
+  .cat { font-size: 11.5px; font-weight: 700; color: var(--blue-deep); background: var(--sky-soft); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .post-title { font-weight: 700; font-size: 14.5px; min-width: 0; overflow-wrap: anywhere; }
+  .post-meta { display: block; font-size: 12px; color: var(--ink-soft); font-weight: 400; }
+  .status { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+  .status.done { background: var(--blue); color: var(--surface); }
+  .status.wait { background: var(--warn-soft); color: var(--warn); }
+  .post-body { display: none; padding: 0 18px 16px; font-size: 14px; }
+  .post.open .post-body { display: block; }
+  .post-body .q { color: var(--ink); margin: 0 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .post-body .a { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; color: var(--ink-soft); }
+  .post-body .a b { color: var(--blue-deep); }
+  .post-body .mine { margin-top: 8px; }
+  .write { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  .write h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .write .caution { font-size: 12.5px; color: var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 8px 10px; margin: 10px 0 12px; }
+  .field { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); margin-bottom: 10px; }
+  textarea.field { min-height: 110px; resize: vertical; }
+  .form-msg { font-size: 12.5px; margin-top: 8px; min-height: 1em; }
+  .form-msg.err { color: var(--warn); }
+
+  /* ---------- FAQ ---------- */
+  .faq-list { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+  details.faq-item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  details.faq-item summary {
+    list-style: none; cursor: pointer; padding: 16px 18px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; font-weight: 700; font-size: 15px;
+  }
+  details.faq-item summary::-webkit-details-marker { display: none; }
+  .q-mark {
+    flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--sky-soft); color: var(--blue-deep);
+    display: flex; align-items: center; justify-content: center; font-size: 13px; transition: transform .2s;
+  }
+  details.faq-item[open] .q-mark { transform: rotate(45deg); }
+  .faq-q { display: flex; gap: 10px; align-items: center; min-width: 0; }
+  .faq-body { padding: 0 18px 18px; font-size: 14px; color: var(--ink-soft); }
+  .src { display: block; margin-top: 8px; font-size: 12px; color: var(--blue); font-weight: 600; }
+
+  /* ---------- 자료실 ---------- */
+  .res-grid { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .res { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .res h4 { font-size: 15px; font-weight: 800; }
+  .res p { margin: 0; font-size: 13px; color: var(--ink-soft); flex: 1; }
+  .res .fmt { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+  .res.pending { border-style: dashed; }
+  .res > .btn { align-self: flex-start; }
+
+  footer { border-top: 1px solid var(--line); padding-block: 28px; text-align: center; font-size: 12.5px; color: var(--ink-soft); }
+
+  @media (max-width: 860px) {
+    .hero-grid, .qna-layout, .sys-layout { grid-template-columns: 1fr; }
+    .timeline { grid-template-columns: repeat(2, 1fr); row-gap: 28px; }
+    .timeline::before { display: none; }
+    .grid-3, .res-grid { grid-template-columns: 1fr 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .sys-list { flex-direction: row; overflow-x: auto; }
+    .sys-btn { flex: none; }
+  }
+  @media (max-width: 560px) {
+    .grid-3, .res-grid, .way-list, .timeline { grid-template-columns: 1fr; }
+    .brand .full { display: none; }
+    .hero-stats { gap: 22px; }
+  }
+
+  /* ========== 우리 부서 포털 디자인 시스템 적용 (색·글꼴·여백만, 글과 기능은 그대로) ========== */
+  body { font-size: var(--fs-body); }
+  /* 글꼴: 제목 32 · 소제목 20 · 본문 16 · 보조 14 · 라벨 12 */
+  .section-title { font-size: clamp(24px, 4vw, var(--fs-title)); line-height: 1.3; }
+  .hero-title { font-size: clamp(30px, 5vw, 42px); }
+  .section-sub, .hero-desc { font-size: var(--fs-body); }
+  .sub-title, .sys-detail h3 { font-size: var(--fs-subtitle); }
+  .card h4, .step h4, .res h4, .write h3, .hero-card h3 { font-size: 17px; }
+  .card p, .step p, .res p, .faq-body, .post-body, .sys-detail ol li, .way, .tip, label.check .d { font-size: var(--fs-small); }
+  .eyebrow, .tag, .cat, .status, .dur, .ex, .res .fmt { font-size: var(--fs-label); }
+  /* 여백: 섹션 사이 48 · 카드 안쪽 24 · 카드 사이 16 */
+  section { padding-block: var(--space-xl); }
+  #home { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+  .hero-card, .step, .check-panel, .card, .sys-detail, .write, .res, .way { padding: var(--space-lg); }
+  .timeline, .grid-3, .grid-4, .res-grid, .sys-layout, .qna-layout, .way-list { gap: var(--space-md); }
+  .timeline, .grid-3, .res-grid, .sys-layout, .tabs { margin-top: var(--space-lg); }
+  /* 모서리: 카드·버튼 8 · 태그·배지 4 · 메뉴·칩은 둥근 알약형 유지 */
+  .hero-card, .step, .check-panel, .card, .sys-detail, .board, .write, .res, details.faq-item, .way, .sys-btn,
+  .btn, .search, .field, .theme-btn, .card .icon, .tip, .write .caution, .post-body .a { border-radius: var(--radius-md); }
+  .tag, .cat, .ex, .dur { border-radius: var(--radius-sm); }
+  /* 색: 강조색은 메뉴 바·주요 버튼·단계 번호에만, 그라데이션·그림자 없이 */
+  header.nav { background: var(--blue); border-bottom: none; backdrop-filter: none; }
+  .brand { color: var(--on-primary); }
+  .brand .dot { background: var(--on-primary); }
+  nav.menu a { color: color-mix(in srgb, var(--on-primary) 82%, transparent); }
+  nav.menu a:hover, nav.menu a:focus-visible { background: color-mix(in srgb, var(--on-primary) 16%, transparent); color: var(--on-primary); }
+  nav.menu a.active { background: var(--on-primary); color: var(--blue); }
+  .theme-btn { background: transparent; border-color: color-mix(in srgb, var(--on-primary) 40%, transparent); }
+  #home { background: var(--bg); }
+  .hero-title .accent { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--sky); }
+  .btn-primary, .num-badge { background: var(--blue); color: var(--on-primary); box-shadow: none; }
+  .btn-primary:hover { background: var(--blue-deep); }
+  .hero-card { box-shadow: none; }
+  .timeline::before { background: var(--line); opacity: 1; }
+  .progress > span { background: var(--blue); }
+  .tab[aria-selected="true"], .chip[aria-pressed="true"], .status.done { background: var(--blue); border-color: var(--blue); color: var(--on-primary); }
+  .stat .num, .card .value-card .kw { color: var(--blue-deep); }
+  /* 자료실 파일 목록 */
+  .res-head { margin-top: var(--space-lg); font-size: var(--fs-subtitle); font-weight: 800; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .res-count { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); }
+  .file-list { list-style: none; margin: var(--space-md) 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .file-row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--space-md); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px var(--space-lg); }
+  .file-ic { width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--sky-soft); color: var(--blue-deep); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .file-info { min-width: 0; display: flex; flex-direction: column; }
+  .file-name { font-size: 16px; color: var(--ink); }
+  .file-desc { font-size: var(--fs-small); color: var(--ink-soft); }
+  .file-size { font-size: var(--fs-small); color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  @media (max-width: 560px) {
+    .file-row { grid-template-columns: auto 1fr; padding: 16px; }
+    .file-size { grid-column: 2; }
+    .file-row .btn { grid-column: 1 / -1; justify-content: center; }
+  }
+  /* ---------- 편의 기능: 모바일 ≡ 메뉴 · 맨 위로 · 계산기 ---------- */
+  :root { --nav-bg: var(--blue); --nav-fg: var(--on-primary); }
+  .menu-btn { display: none; flex: none; width: 36px; height: 36px; border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--nav-fg) 40%, transparent); background: transparent; color: var(--nav-fg); font-size: 20px; line-height: 1; cursor: pointer; }
+  .nav-inner { position: relative; }
+  .top-btn { position: fixed; right: max(20px, calc(env(safe-area-inset-right, 0px) + 12px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 25; width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--blue); color: var(--on-primary); font-size: 20px; font-weight: 800; cursor: pointer; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s; }
+  .top-btn.show { opacity: 1; transform: none; pointer-events: auto; }
+  .menu-btn:focus-visible, .top-btn:focus-visible, .theme-btn:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+  .calc { margin-top: var(--space-xl); scroll-margin-top: calc(var(--nav-h) + 14px); }
+  .calc-grid { margin-top: var(--space-lg); display: grid; grid-template-columns: 300px 1fr; gap: var(--space-md); align-items: start; }
+  .calc-form, .calc-result { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0; }
+  .calc-form { display: flex; flex-direction: column; }
+  .calc-label { font-size: var(--fs-small); font-weight: 700; margin-bottom: 6px; }
+  .calc-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+  .calc-row b { font-size: 22px; color: var(--blue-deep); font-variant-numeric: tabular-nums; text-align: right; }
+  .calc-row small { color: var(--ink-soft); font-weight: 400; }
+  .calc-basis { margin: 14px 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
+  @media (max-width: 860px) {
+    .calc-grid { grid-template-columns: 1fr; }
+    .menu-btn { display: inline-flex; align-items: center; justify-content: center; margin-left: auto; }
+    nav.menu { display: none; position: absolute; top: var(--nav-h); left: 0; right: 0; flex-direction: column; gap: 4px; padding: 8px max(16px, env(safe-area-inset-left, 0px)) 14px; background: var(--nav-bg); border-bottom: 1px solid var(--line); box-shadow: 0 12px 24px -12px rgba(0,0,0,.35); }
+    nav.menu.open { display: flex; }
+    nav.menu a { padding: 12px 14px; font-size: 15px; border-radius: var(--radius-md); }
+  }
+  /* 다크 모드: 메뉴 바는 진한 바탕에 두고 강조색은 활성 메뉴에만 */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) header.nav { background: var(--surface); border-bottom: 1px solid var(--line); }
+    :root:not([data-theme="light"]) .brand { color: var(--blue-deep); }
+    :root:not([data-theme="light"]) .brand .dot { background: var(--blue); }
+    :root:not([data-theme="light"]) nav.menu a { color: var(--ink-soft); }
+    :root:not([data-theme="light"]) nav.menu a:hover { background: var(--sky-soft); color: var(--blue-deep); }
+    :root:not([data-theme="light"]) nav.menu a.active { background: var(--blue); color: var(--on-primary); }
+    :root:not([data-theme="light"]) .theme-btn { border-color: var(--line); }
+    :root:not([data-theme="light"]) { --nav-bg: var(--surface); --nav-fg: var(--ink); }
+  }
+  :root[data-theme="dark"] header.nav { background: var(--surface); border-bottom: 1px solid var(--line); }
+  :root[data-theme="dark"] .brand { color: var(--blue-deep); }
+  :root[data-theme="dark"] .brand .dot { background: var(--blue); }
+  :root[data-theme="dark"] nav.menu a { color: var(--ink-soft); }
+  :root[data-theme="dark"] nav.menu a:hover { background: var(--sky-soft); color: var(--blue-deep); }
+  :root[data-theme="dark"] nav.menu a.active { background: var(--blue); color: var(--on-primary); }
+  :root[data-theme="dark"] .theme-btn { border-color: var(--line); }
+  :root[data-theme="dark"] { --nav-bg: var(--surface); --nav-fg: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="notice-bar">교육용 예시 페이지입니다 · 회사명·조직·제도·수치는 모두 가상의 예시이며 실제 사내 규정과 무관합니다</div>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#home"><span class="dot"></span><span class="full">OO그룹</span> 온보딩</a>
+    <nav class="menu" id="menu" aria-label="영역 바로가기">
+      <a href="#home" class="active">홈</a>
+      <a href="#checklist">체크리스트</a>
+      <a href="#calc">계산기</a>
+      <a href="#org">조직 소개</a>
+      <a href="#systems">사내 시스템</a>
+      <a href="#qna">Q&amp;A</a>
+      <a href="#faq">FAQ</a>
+      <a href="#resources">자료실</a>
+    </nav>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu">≡</button>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="다크 모드 전환" title="라이트/다크 전환">🌓</button>
+  </div>
+</header>
+
+<main>
+  <!-- ===================== 홈 ===================== -->
+  <section id="home">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">WELCOME ABOARD</span>
+        <h1 class="hero-title">입사를 축하합니다!<br><span class="accent">첫날부터 한 달까지</span> 함께 안내할게요</h1>
+        <p class="hero-desc">처음이라 낯선 회사 생활, 무엇부터 해야 할지 이 페이지 하나로 확인하세요. 체크리스트로 할 일을 챙기고, 궁금한 점은 FAQ와 Q&amp;A 게시판에서 찾을 수 있습니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#checklist">첫날 체크리스트 시작</a>
+          <a class="btn btn-ghost" href="#faq">자주 묻는 질문</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><div class="num">4단계</div><div class="label">온보딩 여정</div></div>
+          <div class="stat"><div class="num" id="statTotal">0개</div><div class="label">체크리스트 항목</div></div>
+          <div class="stat"><div class="num">10개</div><div class="label">자주 묻는 질문</div></div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h3>입사 첫날 일정 한눈에 보기 <span class="ex">예시</span></h3>
+        <div class="row"><span>출근·출입증 수령</span><b>09:00</b></div>
+        <div class="row"><span>입사 오리엔테이션 (인사팀)</span><b>09:30</b></div>
+        <div class="row"><span>계정·PC 세팅 (IT 헬프데스크)</span><b>11:00</b></div>
+        <div class="row"><span>팀 소개 & 버디와 점심</span><b>12:00</b></div>
+        <div class="row"><span>팀 리더 1:1 면담</span><b>14:00</b></div>
+        <div class="row"><span>첫날 회고 · 체크리스트 점검</span><b>17:00</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 온보딩 여정 + 체크리스트 ===================== -->
+  <section id="checklist" class="alt">
+    <div class="wrap">
+      <span class="eyebrow">CHECKLIST</span>
+      <h2 class="section-title">온보딩 여정 & 체크리스트</h2>
+      <p class="section-sub">입사 후 첫 달 동안 조직·업무 적응 프로그램이 진행됩니다. 단계별로 할 일을 체크해 보세요.</p>
+
+      <div class="timeline">
+        <div class="step"><div class="num-badge">1</div><h4>입사 첫날</h4><p>오리엔테이션, 계정 발급, 팀·버디와 첫 인사</p><span class="dur">D+1</span></div>
+        <div class="step"><div class="num-badge">2</div><h4>첫 주</h4><p>필수 교육 이수, 사내 시스템 익히기, 업무 범위 확인</p><span class="dur">D+1 ~ D+5</span></div>
+        <div class="step"><div class="num-badge">3</div><h4>첫 달</h4><p>첫 업무 수행, 버디·리더 정기 면담, 적응 회고</p><span class="dur">~ D+30</span></div>
+        <div class="step"><div class="num-badge">4</div><h4>수습 종료</h4><p>수습 기간 회고와 목표 설정 면담</p><span class="dur">약 3개월 <span class="ex">예시</span></span></div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="체크리스트 기간 선택">
+        <button class="tab" role="tab" data-tab="day1" aria-selected="true">입사 첫날</button>
+        <button class="tab" role="tab" data-tab="week1" aria-selected="false">첫 주</button>
+        <button class="tab" role="tab" data-tab="month1" aria-selected="false">첫 달</button>
+      </div>
+      <div class="check-panel">
+        <div class="progress-row">
+          <div class="progress" aria-hidden="true"><span id="progBar"></span></div>
+          <div class="progress-label" id="progLabel">0 / 0 완료</div>
+        </div>
+        <div id="checkBody"></div>
+        <div class="panel-foot">
+          <span class="note" style="margin:0">체크 내용은 이 브라우저에만 남고 외부로 전송되지 않습니다.</span>
+          <button class="link-btn" id="resetChecks" type="button">이 탭 체크 초기화</button>
+        </div>
+      </div>
+
+      <div id="calc" class="calc">
+        <span class="eyebrow">CALCULATOR</span>
+        <h3 class="sub-title" style="margin-top:0">연차·수습 계산기 <span class="ex">예시</span></h3>
+        <p class="section-sub">입사일과 기준일을 넣으면 근로기준법 기준 연차 일수와 수습 종료 예정일을 보여 줍니다. 입력 내용은 이 화면에서만 계산하고 저장하거나 외부로 보내지 않습니다.</p>
+        <div class="calc-grid">
+          <form class="calc-form" id="calcForm" novalidate>
+            <label class="calc-label" for="calcJoin">입사일</label>
+            <input class="field" type="date" id="calcJoin" value="2026-03-02" autocomplete="off">
+            <label class="calc-label" for="calcBase">기준일</label>
+            <input class="field" type="date" id="calcBase" value="2026-11-22" autocomplete="off">
+            <button class="btn btn-primary" type="submit" style="justify-content:center">계산하기</button>
+            <div class="form-msg err" id="calcMsg" role="status"></div>
+          </form>
+          <div class="calc-result" aria-live="polite">
+            <div class="calc-row"><span>근속 기간</span><b id="calcTenure">-</b></div>
+            <div class="calc-row"><span>발생 연차 <small>(만근 가정)</small></span><b id="calcLeave">-</b></div>
+            <div class="calc-row"><span>수습 종료 예정일 <span class="ex">예시 3개월</span></span><b id="calcProb">-</b></div>
+            <p class="calc-basis" id="calcBasis">계산 기준: 1년 미만은 1개월 개근 시 1일(최대 11일), 1년 이상은 15일에 3년차부터 2년마다 1일 가산(최대 25일).</p>
+          </div>
+        </div>
+        <p class="note">※ 근로기준법 제60조 기준의 참고용 예시입니다. 출근율 80% 미만, 회계연도 기준 운영 등 회사 규정에 따라 다를 수 있으니 실제 일수는 근태 시스템에서 확인하세요.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 조직 소개 ===================== -->
+  <section id="org">
+    <div class="wrap">
+      <span class="eyebrow">ORGANIZATION</span>
+      <h2 class="section-title">조직 소개</h2>
+      <p class="section-sub">우리 회사는 아래 6개 부문이 함께 일합니다. 처음 협업할 때 어느 조직에 문의하면 되는지 참고하세요.</p>
+      <p class="note">※ 조직 구성은 교육용 가상 예시입니다. 실제 조직도·인원은 입사 후 그룹웨어 조직도에서 확인하세요.</p>
+
+      <div class="grid-3">
+        <div class="card"><div class="icon">🏢</div><h4>경영지원부문</h4><p>총무·시설, 법무, 구매 등 회사 운영의 기반을 담당합니다.</p><div class="tags"><span class="tag">출입증·좌석</span><span class="tag">비품</span><span class="tag">계약 검토</span></div></div>
+        <div class="card"><div class="icon">🤝</div><h4>인사부문</h4><p>채용·온보딩, 교육, 평가·보상, 조직문화, 인사 제도를 운영합니다.</p><div class="tags"><span class="tag">온보딩</span><span class="tag">교육</span><span class="tag">증명서</span></div></div>
+        <div class="card"><div class="icon">📊</div><h4>재무부문</h4><p>예산·회계·자금을 관리하고 경비 처리 기준을 안내합니다.</p><div class="tags"><span class="tag">경비 정산</span><span class="tag">법인카드</span><span class="tag">예산</span></div></div>
+        <div class="card"><div class="icon">💻</div><h4>IT·디지털부문</h4><p>사내 시스템 운영, 정보보안, 업무 자동화와 AI 활용을 지원합니다.</p><div class="tags"><span class="tag">헬프데스크</span><span class="tag">계정</span><span class="tag">보안</span></div></div>
+        <div class="card"><div class="icon">🏭</div><h4>생산·운영부문</h4><p>생산·출하 현장 운영과 품질 관리, 협력사 관리를 맡습니다.</p><div class="tags"><span class="tag">현장 안전</span><span class="tag">품질</span><span class="tag">교대근무</span></div></div>
+        <div class="card"><div class="icon">📣</div><h4>영업·마케팅부문</h4><p>고객 관리와 시장 분석, 제품·서비스 홍보를 담당합니다.</p><div class="tags"><span class="tag">고객</span><span class="tag">시장 분석</span><span class="tag">브랜드</span></div></div>
+      </div>
+
+      <h3 class="sub-title">우리가 함께 일하고 싶은 사람 — 인재상</h3>
+      <div class="grid-4">
+        <div class="card value-card"><div class="kw">주도</div><p>시키기 전에 문제를 먼저 발견합니다.</p></div>
+        <div class="card value-card"><div class="kw">책임</div><p>맡은 일의 끝을 봅니다.</p></div>
+        <div class="card value-card"><div class="kw">협업</div><p>혼자보다 함께를 택합니다.</p></div>
+        <div class="card value-card"><div class="kw">학습</div><p>어제보다 나은 방법을 찾습니다.</p></div>
+      </div>
+
+      <h3 class="sub-title">일하는 방식</h3>
+      <div class="way-list">
+        <div class="way"><b>회의는 결론부터</b> — 안건과 목표를 먼저 공유하고 시작합니다.</div>
+        <div class="way"><b>기록으로 남깁니다</b> — 구두 합의는 문서로 정리해 공유합니다.</div>
+        <div class="way"><b>직급보다 역할</b> — 의사결정은 담당 역할을 기준으로 합니다.</div>
+        <div class="way"><b>실패는 자산</b> — 원인을 공유하는 것을 질책하지 않습니다.</div>
+      </div>
+      <p class="note">근거: 인재상과 조직문화 소개서(교육용 샘플)</p>
+    </div>
+  </section>
+
+  <!-- ===================== 사내 시스템 ===================== -->
+  <section id="systems" class="alt">
+    <div class="wrap">
+      <span class="eyebrow">SYSTEMS</span>
+      <h2 class="section-title">사내 시스템 사용법</h2>
+      <p class="section-sub">첫 주에 꼭 써야 하는 시스템 6가지를 순서대로 안내합니다. 목록에서 시스템을 고르세요.</p>
+      <p class="note">※ 시스템 이름과 메뉴 경로는 일반적인 예시입니다. 실제 접속 주소와 메뉴는 입사 첫날 IT 헬프데스크 안내를 따르세요.</p>
+      <div class="sys-layout">
+        <div class="sys-list" role="tablist" id="sysList" aria-label="사내 시스템 선택"></div>
+        <div class="sys-detail" id="sysDetail" role="tabpanel"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Q&A 게시판 ===================== -->
+  <section id="qna">
+    <div class="wrap">
+      <span class="eyebrow">Q&amp;A BOARD</span>
+      <h2 class="section-title">Q&amp;A 게시판</h2>
+      <p class="section-sub">FAQ에 없는 궁금증은 여기서 찾아보거나 질문을 남겨 보세요. 동기들이 남긴 질문과 인사팀 답변을 볼 수 있습니다.</p>
+
+      <div class="toolbar">
+        <input class="search" id="qnaSearch" type="search" placeholder="게시글 검색 (예: 연차, 노트북, 경비)" aria-label="Q&A 검색">
+        <div class="chips" id="qnaChips"></div>
+      </div>
+
+      <div class="qna-layout" style="margin-top:16px">
+        <div class="board" id="board"></div>
+        <form class="write" id="qnaForm" novalidate>
+          <h3>질문 남기기</h3>
+          <div class="caution">⚠ 실명·연락처·사번·급여 등 개인정보는 쓰지 마세요. 이 데모 게시판은 서버가 없어 <b>이 브라우저에만 저장</b>되며 인사팀에 전달되지 않습니다.</div>
+          <select class="field" id="qCat" aria-label="카테고리">
+            <option value="입사·온보딩">입사·온보딩</option>
+            <option value="근무·휴가">근무·휴가</option>
+            <option value="시스템·IT">시스템·IT</option>
+            <option value="교육·성장">교육·성장</option>
+          </select>
+          <input class="field" id="qTitle" maxlength="60" placeholder="제목 (60자 이내)" aria-label="제목">
+          <textarea class="field" id="qBody" maxlength="500" placeholder="질문 내용을 적어 주세요 (500자 이내)" aria-label="내용"></textarea>
+          <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">등록하기</button>
+          <div class="form-msg" id="formMsg" role="status"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section id="faq" class="alt">
+    <div class="wrap">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="section-title">자주 묻는 질문</h2>
+      <p class="section-sub">신규 입사자가 가장 많이 묻는 질문 10개입니다. 자료실의 공개 자료만 근거로 만들었고, 답변 끝에 근거 파일을 표시했습니다.</p>
+      <div class="toolbar">
+        <input class="search" id="faqSearch" type="search" placeholder="FAQ 검색 (예: 복장, 수습, 출퇴근)" aria-label="FAQ 검색">
+        <div class="chips" id="faqChips"></div>
+      </div>
+      <div class="faq-list" id="faqList"></div>
+      <p class="note">자료에 없는 개인별 처우·평가·승진 기준은 FAQ로 안내하지 않습니다. 인사팀에 직접 문의하세요.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 자료실 ===================== -->
+  <section id="resources">
+    <div class="wrap">
+      <span class="eyebrow">RESOURCES</span>
+      <h2 class="section-title">자료실</h2>
+      <p class="section-sub">온보딩에 필요한 공개용 자료와 빈 양식을 내려받을 수 있습니다.</p>
+      <h3 class="res-head">공개 자료 <span class="res-count">files 폴더 · 3개</span></h3>
+      <ul class="file-list" id="fileList">
+        <li class="file-row">
+          <span class="file-ic" aria-hidden="true">PDF</span>
+          <span class="file-info"><b class="file-name">신규입사자 온보딩 가이드</b><span class="file-desc">첫날 일정, 첫 주·첫 달 할 일, 수습·근무 기본 안내</span></span>
+          <span class="file-size">PDF · 208 KB</span>
+          <a class="btn btn-primary btn-sm" href="files/onboarding-guide.pdf" download="신규입사자_온보딩_가이드.pdf" aria-label="신규입사자 온보딩 가이드 다운로드">다운로드</a>
+        </li>
+        <li class="file-row">
+          <span class="file-ic" aria-hidden="true">PDF</span>
+          <span class="file-info"><b class="file-name">조직 소개와 인재상</b><span class="file-desc">부문 구성, 인재상, 일하는 방식, 성장 지원</span></span>
+          <span class="file-size">PDF · 261 KB</span>
+          <a class="btn btn-primary btn-sm" href="files/culture-guide.pdf" download="조직소개_인재상.pdf" aria-label="조직 소개와 인재상 다운로드">다운로드</a>
+        </li>
+        <li class="file-row">
+          <span class="file-ic" aria-hidden="true">PDF</span>
+          <span class="file-info"><b class="file-name">사내 시스템 사용 안내</b><span class="file-desc">그룹웨어·근태·HR 셀프서비스 등 6종 사용법</span></span>
+          <span class="file-size">PDF · 221 KB</span>
+          <a class="btn btn-primary btn-sm" href="files/systems-guide.pdf" download="사내시스템_사용안내.pdf" aria-label="사내 시스템 사용 안내 다운로드">다운로드</a>
+        </li>
+      </ul>
+      <h3 class="res-head">바로 만드는 양식</h3>
+      <div class="res-grid" id="resGrid">
+        <div class="res"><div style="font-size:22px">✅</div><h4>온보딩 체크리스트</h4><p>첫날·첫 주·첫 달 할 일 전체 목록 (내 체크 반영)</p><span class="fmt">CSV · 엑셀에서 열림</span><button class="btn btn-ghost btn-sm" data-dl="checklist">다운로드</button></div>
+        <div class="res"><div style="font-size:22px">📝</div><h4>증명서·휴가 신청 빈 양식</h4><p>재직·경력 증명서, 휴가 신청 빈 양식 2종</p><span class="fmt">TXT · 예시 양식</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-dl="cert">증명서</button><button class="btn btn-ghost btn-sm" data-dl="leave">휴가</button></span></div>
+        <div class="res"><div style="font-size:22px">📖</div><h4>신입 용어집</h4><p>기안·상신·전결 등 회사에서 자주 쓰는 용어</p><span class="fmt">TXT</span><button class="btn btn-ghost btn-sm" data-dl="glossary">다운로드</button></div>
+      </div>
+      <p class="note">공개 자료는 이 HTML과 같은 폴더의 files/ 안에 있어야 내려받을 수 있습니다. 내려받은 파일은 한글 이름으로 저장됩니다.</p>
+    </div>
+  </section>
+</main>
+
+<button class="top-btn" id="topBtn" type="button" aria-label="맨 위로">↑</button>
+
+<footer>
+  <div class="wrap">© 2026 OO그룹 인사팀 (가상) · 사내 AI 교육(바이브 코딩) 실습용 예시 페이지 · 실제 회사 제도·규정과 무관합니다</div>
+</footer>
+
+<script>
+(function () {
+  /* ---------- 안전한 브라우저 저장 (실패해도 페이지는 정상 동작) ---------- */
+  function load(key, fallback) {
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; }
+  }
+  function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---------- 다크 모드 토글 ---------- */
+  var root = document.documentElement;
+  var savedTheme = load('onb-theme', null);
+  if (savedTheme) root.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') ||
+      (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    save('onb-theme', next);
+  });
+
+  /* ---------- 상단 메뉴: 부드러운 이동 + 현재 영역 표시 ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll('.menu a'));
+  var sections = links.map(function (l) { return document.querySelector(l.getAttribute('href')); });
+  links.forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var t = document.querySelector(link.getAttribute('href'));
+      if (!t) return;
+      e.preventDefault();
+      t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (l) {
+          var on = l.getAttribute('href') === '#' + en.target.id;
+          l.classList.toggle('active', on);
+          if (on && l.scrollIntoView) l.parentNode.scrollTo({ left: l.offsetLeft - l.parentNode.offsetLeft - (l.parentNode.clientWidth - l.offsetWidth) / 2, behavior: 'smooth' });
+        });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    sections.forEach(function (s) { if (s) obs.observe(s); });
+  }
+
+  /* ---------- 체크리스트 데이터 (예시) ---------- */
+  var CHECK = {
+    day1: [
+      { g: '오전', items: [
+        ['d1-1', '출입증 수령 & 자리 확인', '안내 데스크에서 임시 출입증을 받고 배정 좌석을 확인합니다.'],
+        ['d1-2', '입사 오리엔테이션 참석', '회사 소개, 인재상, 근무 기본 규칙을 안내받습니다.'],
+        ['d1-3', '입사 서류 제출', '안내받은 서류를 인사팀에 제출합니다. (종류는 개별 안내)'],
+        ['d1-4', 'PC·계정 세팅', '노트북 수령 후 그룹웨어·메일 계정에 처음 로그인하고 비밀번호를 변경합니다.']
+      ]},
+      { g: '오후', items: [
+        ['d1-5', '팀원·버디와 인사', '버디(적응 도우미)와 점심을 함께하며 팀 분위기를 익힙니다.'],
+        ['d1-6', '팀 리더 1:1 면담', '팀의 역할과 내 업무 방향을 처음 듣는 시간입니다.'],
+        ['d1-7', '메신저 프로필 등록', '부서·담당 업무만 적습니다. 개인 연락처는 적지 않습니다.'],
+        ['d1-8', '정보보안 서약 확인', '보안 수칙을 읽고 전자 서약을 완료합니다.']
+      ]}
+    ],
+    week1: [
+      { g: '교육', items: [
+        ['w1-1', '필수 법정교육 이수', '교육 플랫폼에서 정보보호·직장 내 괴롭힘 예방 등 필수 과정을 수강합니다.'],
+        ['w1-2', '직무 기초 교육 수강', '팀에서 안내한 직무 입문 과정을 시작합니다.'],
+        ['w1-3', '현장·사업장 견학 (해당자)', '생산 현장 배치자는 안전교육 후 견학합니다.']
+      ]},
+      { g: '시스템', items: [
+        ['w1-4', '근태 시스템 사용해 보기', '출퇴근 기록과 시차출퇴근 시간대 선택 방법을 익힙니다.'],
+        ['w1-5', '전자결재 첫 기안 연습', '연습용 문서로 기안·결재선 지정 흐름을 경험합니다.'],
+        ['w1-6', 'HR 셀프서비스에서 내 정보 확인', '본인 인사정보가 맞는지 확인하고 틀리면 인사팀에 정정 요청합니다.']
+      ]},
+      { g: '업무', items: [
+        ['w1-7', '팀 업무 분장표 확인', '누가 어떤 일을 맡는지 확인하고 내 담당 범위를 정리합니다.'],
+        ['w1-8', '버디와 첫 주 회고', '어려웠던 점과 다음 주 목표를 이야기합니다.']
+      ]}
+    ],
+    month1: [
+      { g: '업무 적응', items: [
+        ['m1-1', '첫 담당 업무 완수', '리더와 합의한 첫 과제를 마무리하고 결과를 공유합니다.'],
+        ['m1-2', '유관 부서 담당자 파악', '자주 협업할 부서와 창구를 정리합니다.'],
+        ['m1-3', '업무 매뉴얼 정리 시작', '배운 내용을 기록으로 남깁니다. (일하는 방식: 기록으로 남깁니다)']
+      ]},
+      { g: '관계·성장', items: [
+        ['m1-4', '리더 정기 면담 (2주 간격 예시)', '적응 상황과 지원이 필요한 부분을 이야기합니다.'],
+        ['m1-5', '사내 AI 활용 교육 신청', '직무 교육 일정에 맞춰 신청합니다.'],
+        ['m1-6', '첫 달 적응 설문 응답', '온보딩 프로그램 개선을 위한 익명 설문입니다.']
+      ]}
+    ]
+  };
+  var checked = load('onb-checks', {});
+  var curTab = 'day1';
+  var allCount = 0;
+  Object.keys(CHECK).forEach(function (k) { CHECK[k].forEach(function (g) { allCount += g.items.length; }); });
+  document.getElementById('statTotal').textContent = allCount + '개';
+
+  function renderChecks() {
+    var html = '';
+    CHECK[curTab].forEach(function (g) {
+      html += '<div class="check-group"><h4>' + esc(g.g) + '</h4>';
+      g.items.forEach(function (it) {
+        html += '<label class="check"><input type="checkbox" data-id="' + it[0] + '"' + (checked[it[0]] ? ' checked' : '') +
+          '><span><span class="t">' + esc(it[1]) + '</span><span class="d">' + esc(it[2]) + '</span></span></label>';
+      });
+      html += '</div>';
+    });
+    document.getElementById('checkBody').innerHTML = html;
+    updateProgress();
+  }
+  function updateProgress() {
+    var total = 0, done = 0;
+    CHECK[curTab].forEach(function (g) { g.items.forEach(function (it) { total++; if (checked[it[0]]) done++; }); });
+    var pct = total ? Math.round(done / total * 100) : 0;
+    document.getElementById('progBar').style.width = pct + '%';
+    document.getElementById('progLabel').textContent = done + ' / ' + total + ' 완료 (' + pct + '%)';
+  }
+  document.getElementById('checkBody').addEventListener('change', function (e) {
+    var id = e.target.getAttribute('data-id');
+    if (!id) return;
+    if (e.target.checked) checked[id] = true; else delete checked[id];
+    save('onb-checks', checked);
+    updateProgress();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    t.addEventListener('click', function () {
+      curTab = t.getAttribute('data-tab');
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (x) { x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
+      renderChecks();
+    });
+  });
+  document.getElementById('resetChecks').addEventListener('click', function () {
+    CHECK[curTab].forEach(function (g) { g.items.forEach(function (it) { delete checked[it[0]]; }); });
+    save('onb-checks', checked);
+    renderChecks();
+  });
+  renderChecks();
+
+  /* ---------- 사내 시스템 (일반 예시) ---------- */
+  var SYS = [
+    { id: 'gw', icon: '🗂️', name: '그룹웨어 · 전자결재', what: '공지사항, 조직도, 전자결재(기안·승인)를 한 곳에서 처리하는 기본 업무 시스템입니다.',
+      steps: ['첫날 받은 임시 비밀번호로 로그인 후 즉시 새 비밀번호로 변경', '[조직도]에서 내 소속 팀과 팀원 확인', '[전자결재] → [새 기안] → 양식 선택 후 내용 작성', '결재선(검토자·승인자) 지정 → 상신', '[결재함]에서 진행 상태 확인'],
+      tip: '첫 기안은 버디와 함께 연습용 문서로 해 보세요. 결재선을 잘못 지정하면 회수 후 다시 상신하면 됩니다.' },
+    { id: 'mail', icon: '✉️', name: '메일 · 메신저', what: '사내외 소통 도구입니다. 업무 합의는 메신저 대화보다 메일·문서로 남기는 것을 권장합니다.',
+      steps: ['메일 서명 설정: 이름 대신 부서·담당 업무 중심으로 작성', '메신저 프로필에 소속과 담당 업무 입력', '팀 공용 대화방 참여 요청', '외부 메일 발송 전 수신자·첨부파일 한 번 더 확인'],
+      tip: '개인 휴대폰 번호 등 개인정보는 프로필에 적지 않아도 됩니다.' },
+    { id: 'hr', icon: '⏰', name: '근태 · 휴가', what: '출퇴근 기록, 시차출퇴근 시간대 선택, 휴가 신청을 처리합니다.',
+      steps: ['출근 시 [출근 등록], 퇴근 시 [퇴근 등록]', '시차출퇴근을 쓰는 경우 [근무 시간대 선택]에서 미리 신청', '[휴가 신청] → 종류·기간 입력 → 팀 리더 승인 요청', '[내 휴가 현황]에서 남은 일수 확인'],
+      tip: '휴가 일수와 사용 기준은 사내 규정에 따릅니다. 수치는 포털에 적지 않으며 시스템 화면에서 확인하세요.' },
+    { id: 'self', icon: '🪪', name: 'HR 셀프서비스', what: '본인 인사정보 확인, 재직·경력 증명서 발급 등 스스로 처리할 수 있는 인사 업무 창구입니다.',
+      steps: ['[내 정보]에서 소속·직무 등 기본 정보 확인', '정보가 다르면 [정정 요청] 버튼으로 인사팀에 요청', '[증명서 발급] → 종류·용도 선택 → 발급', '발급 이력은 [신청 내역]에서 확인'],
+      tip: '본인 정보만 조회됩니다. 다른 직원의 정보는 조회·요청할 수 없습니다.' },
+    { id: 'lms', icon: '🎓', name: '교육 플랫폼 (LMS)', what: '필수 법정교육, 직무 교육, 사내 AI 활용 교육을 신청하고 수강하는 곳입니다.',
+      steps: ['[나의 학습] → [필수 과정]에서 첫 주 이수 과정 확인', '과정 수강 후 평가·설문까지 완료해야 이수 처리', '[과정 신청]에서 직무 교육 신청 → 팀 리더 승인', '[이수 내역]에서 완료 여부 확인'],
+      tip: '필수 교육은 기한이 있으니 첫 주 안에 끝내는 것을 권장합니다.' },
+    { id: 'it', icon: '🛠️', name: 'IT 헬프데스크', what: '계정 잠금, 프로그램 설치, PC 장애 등 IT 문제를 접수하는 창구입니다.',
+      steps: ['[서비스 요청] → 유형(계정·장비·소프트웨어) 선택', '증상과 발생 시각을 구체적으로 작성', '접수 번호로 처리 상태 확인', '해결 후 [완료 확인] 클릭'],
+      tip: '비밀번호는 헬프데스크 담당자도 묻지 않습니다. 비밀번호를 요구하는 메일·메시지는 보안팀에 신고하세요.' }
+  ];
+  var sysList = document.getElementById('sysList');
+  function renderSys(id) {
+    var s = SYS.filter(function (x) { return x.id === id; })[0];
+    Array.prototype.forEach.call(sysList.children, function (b) { b.setAttribute('aria-selected', b.getAttribute('data-id') === id ? 'true' : 'false'); });
+    document.getElementById('sysDetail').innerHTML =
+      '<h3>' + s.icon + ' ' + esc(s.name) + '</h3><p class="what">' + esc(s.what) + '</p><ol>' +
+      s.steps.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') +
+      '</ol><div class="tip">💡 ' + esc(s.tip) + '</div>';
+  }
+  SYS.forEach(function (s) {
+    var b = document.createElement('button');
+    b.className = 'sys-btn'; b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('data-id', s.id);
+    b.innerHTML = '<span>' + s.icon + '</span><span>' + esc(s.name) + '</span>';
+    b.addEventListener('click', function () { renderSys(s.id); });
+    sysList.appendChild(b);
+  });
+  renderSys('gw');
+
+  /* ---------- Q&A 게시판 (샘플 글 + 이 브라우저 전용 작성) ---------- */
+  var SAMPLE_POSTS = [
+    { id: 's1', cat: '시스템·IT', title: '노트북에 개인 프로그램을 설치해도 되나요?', body: '업무에 쓰고 싶은 무료 프로그램이 있는데 직접 설치해도 되는지 궁금합니다.', author: '신규입사자', date: '2026-11-03', answer: '보안 정책상 승인된 소프트웨어만 설치할 수 있습니다. IT 헬프데스크 [서비스 요청]에서 소프트웨어 설치를 요청해 주세요.' },
+    { id: 's2', cat: '근무·휴가', title: '시차출퇴근은 입사 첫 주부터 쓸 수 있나요?', body: '첫 주에도 출근 시간을 선택할 수 있는지 알고 싶어요.', author: '신규입사자', date: '2026-11-04', answer: '시차출퇴근제는 운영 중이며, 첫 주에는 오리엔테이션·교육 일정에 맞춰 출근하고 이후 팀 리더와 협의해 시간대를 정하는 것을 권장합니다. (운영 기준은 사내 규정 참고)' },
+    { id: 's3', cat: '교육·성장', title: '필수 교육을 기한 안에 못 들으면 어떻게 되나요?', body: '첫 주 일정이 바빠서 걱정입니다.', author: '신규입사자', date: '2026-11-05', answer: '교육 플랫폼에서 기한 연장 요청이 가능한지 먼저 확인해 주세요. 어려우면 인사팀 교육 담당에 문의하시면 일정을 함께 조정해 드립니다.' },
+    { id: 's4', cat: '입사·온보딩', title: '버디는 언제까지 함께하나요?', body: '버디 제도가 얼마나 운영되는지 궁금합니다.', author: '신규입사자', date: '2026-11-06', answer: '버디는 입사 후 첫 달 온보딩 프로그램 기간 동안 함께하는 것이 기본입니다. (교육용 예시)' },
+    { id: 's5', cat: '시스템·IT', title: '전자결재 결재선을 잘못 지정했어요', body: '상신 후에 결재선이 틀린 걸 발견했습니다.', author: '신규입사자', date: '2026-11-10', answer: '' }
+  ];
+  var myPosts = load('onb-qna', []);
+  var qnaCat = '전체';
+  var openId = null;
+  var CATS = ['전체', '입사·온보딩', '근무·휴가', '시스템·IT', '교육·성장'];
+
+  function chipBar(el, cats, getCur, setCur) {
+    el.innerHTML = '';
+    cats.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = c;
+      b.setAttribute('aria-pressed', getCur() === c ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        setCur(c);
+        Array.prototype.forEach.call(el.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      });
+      el.appendChild(b);
+    });
+  }
+
+  function renderBoard() {
+    var q = document.getElementById('qnaSearch').value.trim().toLowerCase();
+    var posts = myPosts.slice().reverse().concat(SAMPLE_POSTS.slice().reverse());
+    posts = posts.filter(function (p) {
+      if (qnaCat !== '전체' && p.cat !== qnaCat) return false;
+      if (!q) return true;
+      return (p.title + ' ' + p.body + ' ' + (p.answer || '')).toLowerCase().indexOf(q) > -1;
+    });
+    var board = document.getElementById('board');
+    if (!posts.length) { board.innerHTML = '<div class="empty">조건에 맞는 게시글이 없습니다.</div>'; return; }
+    board.innerHTML = posts.map(function (p) {
+      var mine = p.id.charAt(0) === 'm';
+      var st = p.answer ? '<span class="status done">답변완료</span>' : '<span class="status wait">답변대기</span>';
+      return '<div class="post' + (openId === p.id ? ' open' : '') + '" data-id="' + p.id + '">' +
+        '<button class="post-head" type="button" aria-expanded="' + (openId === p.id) + '">' +
+        '<span class="cat">' + esc(p.cat) + '</span>' +
+        '<span class="post-title">' + esc(p.title) + '<span class="post-meta">' + esc(p.author) + ' · ' + esc(p.date) + (mine ? ' · 내가 쓴 글 (이 브라우저에만 저장)' : ' · 예시 글') + '</span></span>' + st +
+        '</button><div class="post-body"><p class="q">' + esc(p.body) + '</p>' +
+        (p.answer ? '<div class="a"><b>인사팀 답변</b><br>' + esc(p.answer) + '</div>' :
+          '<div class="a">아직 답변이 등록되지 않았습니다. ' + (mine ? '(데모 게시판이라 실제 답변은 달리지 않습니다. 급한 문의는 인사팀으로 해 주세요.)' : '') + '</div>') +
+        (mine ? '<div class="mine"><button class="link-btn" type="button" data-del="' + p.id + '">내 글 삭제</button></div>' : '') +
+        '</div></div>';
+    }).join('');
+  }
+  document.getElementById('board').addEventListener('click', function (e) {
+    var del = e.target.getAttribute && e.target.getAttribute('data-del');
+    if (del) {
+      myPosts = myPosts.filter(function (p) { return p.id !== del; });
+      save('onb-qna', myPosts); renderBoard(); return;
+    }
+    var head = e.target.closest && e.target.closest('.post-head');
+    if (!head) return;
+    var id = head.parentNode.getAttribute('data-id');
+    openId = openId === id ? null : id;
+    renderBoard();
+  });
+  chipBar(document.getElementById('qnaChips'), CATS, function () { return qnaCat; }, function (c) { qnaCat = c; renderBoard(); });
+  document.getElementById('qnaSearch').addEventListener('input', renderBoard);
+
+  /* 개인정보로 보이는 패턴(전화번호·이메일·주민번호 형태)은 등록 차단 */
+  var PII = [/01[016789][-\s.]?\d{3,4}[-\s.]?\d{4}/, /[\w.+-]+@[\w-]+\.[\w.]+/, /\d{6}[-\s]?[1-4]\d{6}/];
+  document.getElementById('qnaForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = document.getElementById('qTitle').value.trim();
+    var body = document.getElementById('qBody').value.trim();
+    var msg = document.getElementById('formMsg');
+    msg.className = 'form-msg err';
+    if (!title || !body) { msg.textContent = '제목과 내용을 모두 입력해 주세요.'; return; }
+    var txt = title + ' ' + body;
+    if (PII.some(function (r) { return r.test(txt); })) { msg.textContent = '전화번호·이메일·주민번호처럼 보이는 내용이 있어요. 개인정보를 지우고 다시 등록해 주세요.'; return; }
+    var d = new Date();
+    var date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var p = { id: 'm' + Date.now(), cat: document.getElementById('qCat').value, title: title, body: body, author: '익명', date: date, answer: '' };
+    myPosts.push(p); save('onb-qna', myPosts);
+    openId = p.id; qnaCat = '전체';
+    chipBar(document.getElementById('qnaChips'), CATS, function () { return qnaCat; }, function (c) { qnaCat = c; renderBoard(); });
+    document.getElementById('qnaSearch').value = '';
+    renderBoard();
+    this.reset();
+    msg.className = 'form-msg'; msg.textContent = '등록했어요. 이 브라우저에서만 보이는 데모 글입니다.';
+  });
+  renderBoard();
+
+  /* ---------- FAQ 10개 (근거 자료 표시) ---------- */
+  var G = 'onboarding-guide.pdf (신규입사자 온보딩 가이드)';
+  var C = 'culture-guide.pdf (조직 소개와 인재상)';
+  var S = 'systems-guide.pdf (사내 시스템 사용 안내)';
+  var FAQ = [
+    ['입사·온보딩', '온보딩 프로그램은 얼마 동안 진행되나요?', '입사 후 첫 달 동안 조직·업무 적응 프로그램이 운영돼요. 같은 팀 선배가 버디로 첫 달 동안 함께하니, 체크리스트를 따라가며 모르는 건 버디에게 편하게 물어보세요.', G],
+    ['입사·온보딩', '수습 기간이 있나요? 수습 중 급여가 다른가요?', '수습 기간은 3개월이고, 수습 기간 중 급여 차등은 없어요. 개인별 처우는 인사팀이 개별로 안내드립니다.', G],
+    ['입사·온보딩', '입사 서류는 언제, 어떻게 내나요?', '제출할 서류의 종류와 기한은 입사 전후 인사팀이 개별로 안내해요. 졸업·경력 증명서 같은 자격 증빙은 최종 합격 후 지정된 경로로만 제출하고, 메신저나 개인 메일로는 보내지 않습니다.', G],
+    ['입사·온보딩', '첫날은 어떤 일정으로 진행되나요?', '오전에는 출입증 수령, 입사 오리엔테이션, 노트북·계정 세팅을 하고, 오후에는 버디와 점심, 팀 리더 1:1 면담, 첫날 회고가 이어져요. 시간표는 온보딩 가이드의 첫날 일정을 참고하세요.', G],
+    ['근무·휴가', '출퇴근 시간은 정해져 있나요?', '주 5일 근무이며 시차출퇴근제로 출근 시각을 선택할 수 있어요. 첫 주는 교육 일정에 맞춰 출근하고, 이후 팀 리더와 협의해 시간대를 정하면 됩니다.', G],
+    ['근무·휴가', '점심시간과 복장 규정이 궁금해요.', '점심시간은 1시간이며 팀 상황에 따라 유연하게 사용해요. 복장은 자율이고, 고객 응대나 현장 방문이 있는 날에는 상황에 맞춰 입으면 됩니다.', G],
+    ['근무·휴가', '휴가는 어떻게 신청하나요?', '근태 시스템 [휴가 신청]에서 종류와 기간을 입력하고 팀 리더 승인을 요청하면 돼요. 휴가 일수와 사용 요건은 사내 규정에 따르며, 남은 일수는 [내 휴가 현황]에서 확인할 수 있습니다.', G + ' · ' + S],
+    ['시스템·IT', '첫 로그인 후 꼭 해야 할 일이 있나요?', '첫날 받은 임시 비밀번호로 그룹웨어에 로그인한 뒤 바로 새 비밀번호로 바꿔 주세요. 헬프데스크 담당자도 비밀번호를 묻지 않으니, 비밀번호를 요구하는 메시지는 보안팀에 신고하세요.', S],
+    ['교육·성장', '어떤 교육을 받을 수 있나요?', '첫 주에는 필수 법정교육을 이수하고, 이후 직무별 실무 교육과 사내 AI 활용 교육을 들을 수 있어요. 직무 관련 교육·자격 취득 지원도 있으며 범위와 한도는 사내 규정에 따릅니다.', C + ' · ' + S],
+    ['교육·성장', '나중에 다른 부서로 옮길 수 있나요?', '부서 간 이동 기회는 사내 공모를 통해 열려 있어요. 공모 일정과 지원 자격은 공지되는 내용을 확인해 주세요.', C]
+  ];
+  var faqCat = '전체';
+  function renderFaq() {
+    var q = document.getElementById('faqSearch').value.trim().toLowerCase();
+    var list = FAQ.filter(function (f) {
+      if (faqCat !== '전체' && f[0] !== faqCat) return false;
+      return !q || (f[1] + ' ' + f[2]).toLowerCase().indexOf(q) > -1;
+    });
+    var el = document.getElementById('faqList');
+    if (!list.length) { el.innerHTML = '<div class="empty">검색 결과가 없습니다. Q&amp;A 게시판에서 찾아보거나 질문을 남겨 보세요.</div>'; return; }
+    el.innerHTML = list.map(function (f) {
+      return '<details class="faq-item"><summary><span class="faq-q"><span class="cat">' + esc(f[0]) + '</span><span>' + esc(f[1]) +
+        '</span></span><span class="q-mark">+</span></summary><div class="faq-body">' + esc(f[2]) + (f[3] ? '<span class="src">근거: ' + esc(f[3]) + '</span>' : '') + '</div></details>';
+    }).join('');
+  }
+  chipBar(document.getElementById('faqChips'), ['전체'].concat(FAQ.map(function (f) { return f[0]; }).filter(function (c, i, a) { return a.indexOf(c) === i; })), function () { return faqCat; }, function (c) { faqCat = c; renderFaq(); });
+  document.getElementById('faqSearch').addEventListener('input', renderFaq);
+  renderFaq();
+
+  /* ---------- 자료실: 브라우저에서 바로 파일 생성 ---------- */
+  function download(name, text, type) {
+    var blob = new Blob(['﻿' + text], { type: type + ';charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  var LABEL = { day1: '입사 첫날', week1: '첫 주', month1: '첫 달' };
+  var FILES = {
+    checklist: function () {
+      var rows = ['기간,구분,할 일,설명,완료'];
+      Object.keys(CHECK).forEach(function (k) {
+        CHECK[k].forEach(function (g) { g.items.forEach(function (it) {
+          rows.push([LABEL[k], g.g, it[1], it[2], checked[it[0]] ? 'O' : ''].map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','));
+        }); });
+      });
+      download('onboarding-checklist.csv', rows.join('\r\n'), 'text/csv');
+    },
+    cert: function () {
+      download('certificate-request-form.txt', [
+        '[증명서 신청서 · 빈 양식 / 교육용 예시]', '',
+        '1. 신청 증명서 종류 :  □ 재직증명서   □ 경력증명서', '2. 소속 부서 :', '3. 성명 :', '4. 제출처 :', '5. 용도 :', '6. 필요 부수 :     부', '7. 신청일 :      년    월    일', '',
+        '※ HR 셀프서비스 [증명서 발급]에서 바로 발급할 수 있습니다.', '※ 본 양식은 교육용 예시이며 실제 회사 양식이 아닙니다.'].join('\r\n'), 'text/plain');
+    },
+    leave: function () {
+      download('leave-request-form.txt', [
+        '[휴가 신청서 · 빈 양식 / 교육용 예시]', '',
+        '1. 소속 부서 :', '2. 성명 :', '3. 휴가 종류 :  □ 연차   □ 반차(오전/오후)   □ 경조   □ 기타(        )',
+        '4. 기간 :      년   월   일  ~      년   월   일  (총    일)', '5. 업무 인수인계자 :', '6. 인수인계 내용 :', '7. 비상 시 연락 방법 : (팀 내 공유 방식만 기재)', '',
+        '※ 실제 신청은 근태 시스템 [휴가 신청]에서 진행합니다.', '※ 휴가 일수·요건은 사내 규정을 따릅니다. 본 양식은 교육용 예시입니다.'].join('\r\n'), 'text/plain');
+    },
+    glossary: function () {
+      download('onboarding-glossary.txt', [
+        '[신입 용어집 / 교육용 예시]', '',
+        '기안 : 결재를 받기 위해 문서를 작성해 올리는 것', '상신 : 작성한 기안 문서를 결재선에 올리는 것', '결재선 : 문서를 검토·승인하는 사람의 순서',
+        '회수 : 상신한 문서를 결재 전에 되돌려 받는 것', '전결 : 위임받은 사람이 최종 결재하는 것', '협조 : 다른 부서의 검토 의견을 받는 단계',
+        '버디 : 신규 입사자의 첫 달 적응을 돕는 동료', 'R&R : 역할과 책임(Role & Responsibility)', 'F/U : 후속 조치(Follow-up)', 'ASAP : 가능한 한 빨리',
+        'FYI : 참고용으로 공유', '시차출퇴근 : 출근 시각을 선택해 근무하는 제도'].join('\r\n'), 'text/plain');
+    }
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-dl]'), function (b) {
+    b.addEventListener('click', function () { FILES[b.getAttribute('data-dl')](); });
+  });
+})();
+</script>
+<script>
+/* 편의 기능: 모바일 ≡ 메뉴 · 맨 위로 · 연차·수습 계산기 (입력값은 저장·전송하지 않음) */
+(function () {
+  var menu = document.getElementById('menu'), btn = document.getElementById('menuBtn');
+  function setOpen(open) {
+    menu.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    btn.textContent = open ? '✕' : '≡';
+  }
+  btn.addEventListener('click', function () { setOpen(!menu.classList.contains('open')); });
+  menu.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+  document.addEventListener('click', function (e) { if (!e.target.closest('header.nav')) setOpen(false); });
+  window.addEventListener('resize', function () { if (window.innerWidth > 860) setOpen(false); });
+
+  /* 계산기 메뉴도 현재 위치 강조에 포함 */
+  var calcEl = document.getElementById('calc'), calcLink = menu.querySelector('a[href="#calc"]');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (en) {
+      en.forEach(function (x) {
+        if (!x.isIntersecting) return;
+        Array.prototype.forEach.call(menu.querySelectorAll('a'), function (a) { a.classList.toggle('active', a === calcLink); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' }).observe(calcEl);
+  }
+
+  var top = document.getElementById('topBtn');
+  function onScroll() { top.classList.toggle('show', window.scrollY > 600); }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  top.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  function parse(v) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+  function fmt(d) { return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0'); }
+  function addMonths(d, n) { var r = new Date(d.getFullYear(), d.getMonth() + n, d.getDate()); if (r.getDate() !== d.getDate()) r = new Date(d.getFullYear(), d.getMonth() + n + 1, 0); return r; }
+  function fullMonths(a, b) { var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (addMonths(a, m) > b) m--; return Math.max(0, m); }
+  function calc(e) {
+    if (e) e.preventDefault();
+    var j = parse(document.getElementById('calcJoin').value), b = parse(document.getElementById('calcBase').value);
+    var msg = document.getElementById('calcMsg'); msg.textContent = '';
+    if (!j || !b) { msg.textContent = '입사일과 기준일을 모두 입력해 주세요.'; return; }
+    if (b < j) { msg.textContent = '기준일은 입사일과 같거나 뒤여야 해요.'; return; }
+    var months = fullMonths(j, b), years = Math.floor(months / 12), leave, basis;
+    if (years < 1) { leave = Math.min(months, 11); basis = '1년 미만: 개근한 달 ' + months + '개월 × 1일' + (months > 11 ? ' (최대 11일)' : ''); }
+    else { var add = Math.floor((years - 1) / 2); leave = Math.min(15 + add, 25); basis = '근속 ' + years + '년: 기본 15일' + (add ? ' + 가산 ' + add + '일' : '') + (15 + add > 25 ? ' (최대 25일)' : ''); }
+    document.getElementById('calcTenure').textContent = (years ? years + '년 ' : '') + (months % 12) + '개월';
+    document.getElementById('calcLeave').textContent = leave + '일';
+    document.getElementById('calcProb').textContent = fmt(addMonths(j, 3));
+    document.getElementById('calcBasis').textContent = '계산 근거: ' + basis + '.';
+  }
+  document.getElementById('calcForm').addEventListener('submit', calc);
+  calc();
+})();
+</script>
+</body>
+</html>
