@@ -10,7 +10,7 @@
   /*
     레이아웃 컨셉: 상단 고정 네비 + 섹션 단위 세로 스크롤 (교육 샘플 portal_v2와 동일 구조).
     각 섹션은 scroll-margin-top으로 고정 메뉴 높이만큼 여백을 두어 앵커 이동 시 제목이 가려지지 않도록 함.
-    색·글꼴·여백은 "우리 부서 포털" 디자인 시스템(https://claude.ai/artifact/VdbSaFT3cxwYQEVcAPFMGX)을 따름.
+    색·글꼴·여백은 "우리 부서 포털" 디자인 시스템을 따름.
     ※ 교육용 예시 페이지. 실명·연락처·급여·사번 등 민감정보와 실제 사내 기밀을 담지 않음.
   */
   :root {
@@ -55,6 +55,7 @@
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  body { word-break: keep-all; overflow-wrap: break-word; } /* 한글이 단어 중간에서 줄바꿈되지 않도록 */
   a { color: inherit; }
   button, input, select, textarea { font: inherit; color: inherit; }
 
@@ -534,7 +535,7 @@
             <label class="calc-label" for="calcJoin">입사일</label>
             <input class="field" type="date" id="calcJoin" value="2026-03-02" autocomplete="off">
             <label class="calc-label" for="calcBase">기준일</label>
-            <input class="field" type="date" id="calcBase" value="2026-11-22" autocomplete="off">
+            <input class="field" type="date" id="calcBase" value="" autocomplete="off">
             <button class="btn btn-primary" type="submit" style="justify-content:center">계산하기</button>
             <div class="form-msg err" id="calcMsg" role="status"></div>
           </form>
@@ -545,7 +546,7 @@
             <p class="calc-basis" id="calcBasis">계산 기준: 1년 미만은 1개월 개근 시 1일(최대 11일), 1년 이상은 15일에 3년차부터 2년마다 1일 가산(최대 25일).</p>
           </div>
         </div>
-        <p class="note">※ 근로기준법 제60조 기준의 참고용 예시입니다. 출근율 80% 미만, 회계연도 기준 운영 등 회사 규정에 따라 다를 수 있으니 실제 일수는 근태 시스템에서 확인하세요.</p>
+        <p class="note">※ 근로기준법 제60조(상시 5인 이상 사업장 적용) 기준의 참고용 예시입니다. 출근율 80% 미만, 회계연도 기준 운영 등 회사 규정에 따라 다를 수 있으니 실제 일수는 근태 시스템에서 확인하세요.</p>
       </div>
     </div>
   </section>
@@ -658,7 +659,7 @@
         <li class="file-row">
           <span class="file-ic" aria-hidden="true">PDF</span>
           <span class="file-info"><b class="file-name">신규입사자 온보딩 가이드</b><span class="file-desc">첫날 일정, 첫 주·첫 달 할 일, 수습·근무 기본 안내</span></span>
-          <span class="file-size">PDF · 208 KB</span>
+          <span class="file-size">PDF · 322 KB</span>
           <a class="btn btn-primary btn-sm" href="files/onboarding-guide.pdf" download="신규입사자_온보딩_가이드.pdf" aria-label="신규입사자 온보딩 가이드 다운로드">다운로드</a>
         </li>
         <li class="file-row">
@@ -755,7 +756,7 @@
     ],
     week1: [
       { g: '교육', items: [
-        ['w1-1', '필수 법정교육 이수', '교육 플랫폼에서 정보보호·직장 내 괴롭힘 예방 등 필수 과정을 수강합니다.'],
+        ['w1-1', '필수 교육 이수', '교육 플랫폼에서 직장 내 성희롱 예방 등 법정의무교육과 정보보호 교육을 수강합니다.'],
         ['w1-2', '직무 기초 교육 수강', '팀에서 안내한 직무 입문 과정을 시작합니다.'],
         ['w1-3', '현장·사업장 견학 (해당자)', '생산 현장 배치자는 안전교육 후 견학합니다.']
       ]},
@@ -1074,6 +1075,7 @@
   function fmt(d) { return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0'); }
   function addMonths(d, n) { var r = new Date(d.getFullYear(), d.getMonth() + n, d.getDate()); if (r.getDate() !== d.getDate()) r = new Date(d.getFullYear(), d.getMonth() + n + 1, 0); return r; }
   function fullMonths(a, b) { var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (addMonths(a, m) > b) m--; return Math.max(0, m); }
+  (function () { var t = new Date(), el = document.getElementById('calcBase'); if (!el.value) el.value = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); })();
   function calc(e) {
     if (e) e.preventDefault();
     var j = parse(document.getElementById('calcJoin').value), b = parse(document.getElementById('calcBase').value);
